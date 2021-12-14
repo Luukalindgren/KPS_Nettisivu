@@ -11,9 +11,8 @@
     <!--Navigation bar-->
     <nav class="navbar">
         <div class="navbar_container">
-            <a href="#home" id="navbar_logo">KIVI PAPERI SAKSET</a>
+            <a href="#home" id="navbar_logo">KPS</a>
             <div class="navbar_toggle" id="menu">
-                <span class="bar"></span>
                 <span class="bar"></span>
                 <span class="bar"></span>
             </div>
@@ -27,5 +26,18 @@
             </ul>
         </div>
     </nav>
+    <script>
+
+        const history_api = "https://bad-api-assignment.reaktor.com/rps/history"
+        const livegame_api = "https://bad-api-assignment.reaktor.com/rps/live"
+        
+        async function getData(url) {
+            const response = await fetch(url);
+            const data = await response.json();
+            console.log(data);
+        }
+        getData(history_api);
+
+    </script>
 </body>
 </html>
