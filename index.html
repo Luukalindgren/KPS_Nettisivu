@@ -27,12 +27,13 @@
         </div>
     </nav>
 
+    <!--Live game-->
     <div style="text-align: center; margin-top: 2em;">
-        <h1 style="color: rgb(68, 68, 68);">Käynnissä oleva ottelu:</h1></div>
+        <h1>Käynnissä oleva ottelu:</h1></div>
     <div style="float: left; margin-top: 20px; margin-left: 20%;">
-        <h2 style="color: rgb(68, 68, 68);">Pelaaja 1:</h2></div>
+        <h2>Pelaaja 1:</h2></div>
     <div style="float: right; margin-top: 20px; margin-right: 20%;">
-        <h2 style="color: rgb(68, 68, 68)">Pelaaja 2:</h2></div>
+        <h2>Pelaaja 2:</h2></div>
     
     <br style="clear:both" />
 
@@ -47,12 +48,31 @@
         alt="Kivi oikealta"
         width="450"></div>
 
+    <br style="clear:both" />
 
-    <div style="text-align: center; margin-top: 100px;">
-        <h1 style="color: rgb(68, 68, 68)">Pelihistoria:</h1></div>
+    <!--Game history-->
+    <div style="text-align: center; margin-top: 20px; margin-bottom: 10px;">
+        <h1>Pelihistoria:</h1></div>
         
+    <input type="text" 
+        id="searchBar" 
+        onkeyup="search()" 
+        placeholder="Etsi pelaajia nimellä...">
+
+    <br style="clear:both" />
+
+    <ul id="listaPeleistä">
+        <li><a>Untamo Korhonen</a></li>
+        <li><a>Tapio Korhonen</a></li>
+        <li><a>Vellamo Laine</a></li>
+        <li><a>Sampo Jokinen</a></li>
+        <li><a>Aino Hämäläinen</a></li>
+        <li><a>Kokko Järvinen</a></li>
+    </ul>
+
     <script>
 
+        //Fetch data from API function
         const history_api = "https://bad-api-assignment.reaktor.com/rps/history"
         const livegame_api = "https://bad-api-assignment.reaktor.com/rps/live"
         
@@ -61,6 +81,27 @@
             const data = await response.json();
             console.log(data);
         }
+
+        //Searchbar function
+        function search() {
+            var input, filter, ul, li, a, i, txtValue;
+            input = document.getElementById('searchBar');
+            filter = input.value.toUpperCase();
+            ul = document.getElementById("listaPeleistä");
+            li = ul.getElementsByTagName('li');
+
+            //Iterate through list, hide those who don't match the search
+            for (i=0; i<li.length;i++) {
+                a = li[i].getElementsByTagName("a")[0];
+                txtValue = a.textContent || a.innerText;
+                if (txtValue.toLocaleUpperCase().indexOf(filter) > -1) {
+                    li[i].style.display = "";
+                } else {
+                    li[i].style.display = "none";
+                }
+            }
+        }
+
         getData(history_api);
 
     </script>
