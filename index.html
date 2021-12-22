@@ -62,22 +62,20 @@
     <br style="clear:both" />
 
     <div id="listaPeleistä"></div>
-    <!--
-    <ul id="listaPeleistä">
-        <li><a>Untamo Korhonen</a></li>
-        <li><a>Tapio Korhonen</a></li>
-        <li><a>Vellamo Laine</a></li>
-        <li><a>Sampo Jokinen</a></li>
-        <li><a>Aino Hämäläinen</a></li>
-        <li><a>Kokko Järvinen</a></li> 
-    </ul>
--->
+
     <script>
 
         //Fetch data from API function
         const history_api = "https://bad-api-assignment.reaktor.com/rps/history"
-        const livegame_api = "https://bad-api-assignment.reaktor.com/rps/live"
+        const livegame_api = "ws://bad-api-assignment.reaktor.com/rps/live"
         
+        //Gets the live data from ongoing games
+        var live = new WebSocket(livegame_api)
+        live.onmessage = function(event) {
+            console.log(event.data);
+        }
+
+        //Gets the history data from past games
         async function getData(url) {
             const response = await fetch(url);
             const data = await response.json();
@@ -85,7 +83,37 @@
             console.log(temp);
 
             var list = document.createElement("ul");
+            const results = {};
             for (let i in temp) {
+                var nimiA = temp[i].playerA.name;
+                var nimiB = temp[i].playerB.name;
+                //Adds players to the object, if they aren't there already.
+                //Adds subarrays to them where all their matches and choices will be placed
+                if (!(nimiA in results)) { 
+                    results[nimiA] = {};
+                    results[nimiA]["Ottelut"] = [];
+                    results[nimiA]["Valinnat"] = [];
+                } if (!(nimiB in results)) { 
+                    results[nimiB] = {};
+                    results[nimiB]["Ottelut"] = [];
+                    results[nimiB]["Valinnat"] = [];
+                }
+               //Adds wins and losses (and ties) to each players arrays
+                if (winner(temp[i].playerA, temp[i].playerB) === nimiA) {
+                    results[nimiA]["Ottelut"].push("Voitto!");
+                    results[nimiB]["Ottelut"].push("Häviö!");
+                } if (winner(temp[i].playerA, temp[i].playerB) === nimiB) {
+                    results[nimiB]["Ottelut"].push("Voitto!");
+                    results[nimiA]["Ottelut"].push("Häviö!");
+                } else {
+                    results[nimiB]["Ottelut"].push("Tasapeli!");
+                    results[nimiA]["Ottelut"].push("Tasapeli!");
+                }
+                //Adds both players choices to array for later comparison
+                results[nimiA]["Valinnat"].push(temp[i].playerA.played);
+                results[nimiB]["Valinnat"].push(temp[i].playerB.played);
+                console.log(results);
+
                 let item = document.createElement("li");
                 list.appendChild(item);
 
@@ -99,20 +127,43 @@
                 let subitem = document.createElement("li");
                 subitem.innerHTML = "Player 1: " 
                 + temp[i].playerA.name + ", played: " 
-                + temp[i].playerA.played;
+                + temp[i].playerA.played + "     Most played hand: " 
+                + mostPlayed(temp[i].playerA) + "     Win ratio: " + winrate(temp[i].playerA);
                 item.appendChild(subitem);
  
                 let subitem2 = document.createElement("li");
                 subitem2.innerHTML = "Player 2: " 
                 + temp[i].playerB.name + ", played: " 
-                + temp[i].playerB.played;
+                + temp[i].playerB.played+ "     Most played hand: " 
+                + mostPlayed(temp[i].playerB) + "     Win ratio: " + winrate(temp[i].playerB);
                 item.appendChild(subitem2);
 
                 let subitem3 = document.createElement("li");
-                subitem3.innerHTML = "Result: " + winner(temp[i].playerA, temp[i].playerB);
+                subitem3.innerHTML = "Winner is: " + winner(temp[i].playerA, temp[i].playerB);
                 item.appendChild(subitem3)
             }
             document.getElementById("listaPeleistä").appendChild(list);
+        }
+
+        //Function to calculate win ratio
+        function winrate(player) {
+            var wins, total, winrate;
+            for (i in results[player.name]["Ottelut"]){
+                if (i === "Voitto!") {
+                    wins = wins + 1;
+                }
+            }
+            winrate = (wins / results[player.name]["Ottelut"].length);
+            return winrate;
+        }
+
+        //Function to tell the most played hand
+        function mostPlayed(player) {
+            var array = results[player.name]["Valinnat"];
+            return array.sort((a,b) =>
+                array.filter(v => v===a).length
+                - array.filter(v => v===b).length
+                ).pop();
         }
 
         //Function to see who won
@@ -123,16 +174,16 @@
                 return "Tie"
             } else {
                 if (choiceA === "ROCK") {
-                    if (choiceB === "SCISSORS") { return playerA.name + " won!";}
-                    else { return playerB.name + " won!";}
+                    if (choiceB === "SCISSORS") { return playerA.name ;}
+                    else { return playerB.name;}
                 }
                 if (choiceA === "PAPER") {
-                    if (choiceB === "SCISSORS") { return playerB.name + " won!";}
-                    else { return playerA.name + " won!";}
+                    if (choiceB === "SCISSORS") { return playerB.name ;}
+                    else { return playerA.name;}
                 }
                 if (choiceA === "SCISSORS") {
-                    if (choiceB === "ROCK") { return playerB.name + " won!";}
-                    else { return playerA.name + " won!";}
+                    if (choiceB === "ROCK") { return playerB.name;}
+                    else { return playerA.name;}
                 }
             }
 
