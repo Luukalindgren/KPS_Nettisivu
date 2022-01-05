@@ -4,3 +4,5 @@ Projekti kesätyöhakua varten vuodelle 2022. Tehtävänanto: https://www.reakto
 
 TL;DR:
 Nettisivu joka näyttää käynnissä olevan KPS pelin tuloksen, sekä kaikki menneet ottelut. Data saadaan kahdesta annetusta API:sta.
+
+KESKEN...
